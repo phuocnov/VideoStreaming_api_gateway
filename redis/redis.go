@@ -1,39 +1,52 @@
 package redis
 
 import (
+	"APIGateway/pkg/dto"
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/go-redis/redis/v8"
 )
 
 var ctx = context.Background()
-var rbd *redis.Client
+var rdb *redis.Client
 
 func Init() {
-	rbd = redis.NewClient(&redis.Options{
+	rdb = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
 
-	_, err := rbd.Ping(ctx).Result()
+	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
 }
 
-func Get(key string) string {
-	val, err := rbd.Get(ctx, key).Result()
+func GetTodos(key string, todos *[]dto.Todo) error {
+	val, err := rdb.Get(ctx, key).Result()
 	if err != nil {
-		log.Fatalf("Failed to get value from Redis: %v", err)
+		return err
 	}
-	return val
+
+	if err := json.Unmarshal([]byte(val), todos); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func Set(key string, value string) {
-	err := rbd.Set(ctx, key, value, 0).Err()
+func SetTodos(key string, todos []dto.Todo) error {
+	val, err := json.Marshal(todos)
 	if err != nil {
-		log.Fatalf("Failed to set value to Redis: %v", err)
+		return err
 	}
+
+	if err := rdb.Set(ctx, key, val, 0).Err(); err != nil {
+		return err
+	}
+
+	return nil
 }

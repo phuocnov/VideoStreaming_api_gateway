@@ -2,6 +2,9 @@ package handler
 
 import (
 	"APIGateway/pkg/data"
+	"APIGateway/pkg/dto"
+	"APIGateway/redis"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,7 +13,16 @@ import (
 )
 
 func GetAllTodo(writer http.ResponseWriter, request *http.Request) {
-	todos := data.Todos
+	const cache_key = "todos"
+
+	var todos []dto.Todo
+
+	if err := redis.GetTodos(cache_key, &todos); err != nil {
+		todos = data.Todos
+		redis.SetTodos(cache_key, todos)
+		fmt.Println("Get todos from data")
+	}
+
 	responseWithJson(writer, http.StatusOK, todos)
 }
 

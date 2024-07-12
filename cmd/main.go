@@ -2,6 +2,7 @@ package main
 
 import (
 	"APIGateway/pkg/handler"
+	"APIGateway/redis"
 	"log"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func main() {
+	redis.Init()
 	r := mux.NewRouter()
 	r.HandleFunc("/todos", handler.GetAllTodo).Methods("GET")
 	r.HandleFunc("/todos/{id}", handler.GetTodoById).Methods("GET")
