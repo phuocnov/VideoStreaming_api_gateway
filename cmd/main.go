@@ -1,6 +1,7 @@
 package main
 
 import (
+	"APIGateway/pkg/database"
 	"APIGateway/pkg/handler"
 	"APIGateway/redis"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 func main() {
 	redis.Init()
+	database.Init()
 	r := mux.NewRouter()
 	r.HandleFunc("/todos", handler.GetAllTodo).Methods("GET")
 	r.HandleFunc("/todos/{id}", handler.GetTodoById).Methods("GET")
